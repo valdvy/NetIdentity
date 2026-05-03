@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetIdentity — Doit-on s'identifier sur Internet ?</title>
+<meta name="description" content="Dossier interactif sur l'identification numérique : veille, sondage, fact-checker et débat sourcé.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:   #0f0e0d;
+    --cream: #f5f0e8;
+    --rust:  #c84b2f;
+    --gold:  #d4a53f;
+    --steel: #2c3e50;
+    --muted: #7a7264;
+    --green: #3a7d5c;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ─── CANVAS BG ─── */
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.35;
+  }
+
+  /* ─── LAYOUT ─── */
+  .page { position: relative; z-index: 1; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 48px;
+    background: rgba(15,14,13,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #1e1c1a;
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--cream);
+    letter-spacing: -0.5px;
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--rust); font-style: italic; }
+
+  .nav-links { display: flex; gap: 0; }
+
+  .nav-links a {
+    color: #5a5446;
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--cream); border-color: var(--rust); }
+
+  .nav-cta {
+    background: var(--rust);
+    color: var(--cream) !important;
+    border-bottom: none !important;
+    padding: 10px 22px !important;
+    transition: background 0.2s !important;
+  }
+
+  .nav-cta:hover { background: #a83a20 !important; }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(200,75,47,0.15) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 20%, rgba(212,165,63,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 90%, rgba(58,125,92,0.08) 0%, transparent 45%);
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #2a2720;
+    padding: 7px 18px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 40px;
+    position: relative;
+    animation: fadeUp 0.7s ease both;
+    background: rgba(212,165,63,0.06);
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 11vw, 9rem);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -2px;
+    position: relative;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero-title .line1 { display: block; color: var(--cream); }
+  .hero-title .line2 { display: block; color: var(--rust); font-style: italic; }
+
+  .hero-sub {
+    margin-top: 36px;
+    max-width: 540px;
+    color: #7a7264;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    position: relative;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 48px;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+    animation: fadeUp 1s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--rust);
+    color: var(--cream);
+    text-decoration: none;
+    padding: 14px 32px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-primary:hover { background: #a83a20; transform: translateY(-2px); }
+
+  .btn-secondary {
+    border: 1px solid #3a3530;
+    color: #7a7264;
+    text-decoration: none;
+    padding: 14px 32px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.2s, border-color 0.2s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-secondary:hover { color: var(--cream); border-color: var(--cream); transform: translateY(-2px); }
+
+  /* arrow icon */
+  .icon-arrow { font-size: 0.85em; transition: transform 0.2s; }
+  .btn-primary:hover .icon-arrow { transform: translateX(3px); }
+
+  /* ─── STATS STRIP ─── */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: #1a1816;
+    margin: 0;
+  }
+
+  @media (max-width: 700px) { .stats-strip { grid-template-columns: repeat(2,1fr); } }
+
+  .stat-item {
+    background: #0d0c0b;
+    padding: 44px 32px;
+    text-align: center;
+    transition: background 0.25s;
+  }
+
+  .stat-item:hover { background: #141210; }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .stat-num.rust  { color: var(--rust); }
+  .stat-num.gold  { color: var(--gold); }
+  .stat-num.green { color: var(--green); }
+  .stat-num.steel { color: #4a6fa5; }
+
+  .stat-item p { font-size: 0.8rem; color: #5a5446; line-height: 1.5; }
+  .stat-item small { font-size: 0.65rem; color: #3a3530; letter-spacing: 1px; display: block; margin-top: 6px; }
+
+  /* ─── FEATURES SECTION ─── */
+  .features {
+    padding: 100px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-eyebrow {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--cream);
+    margin-bottom: 56px;
+    max-width: 600px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2px;
+    background: #1a1816;
+  }
+
+  .feature-card {
+    background: #0f0e0d;
+    padding: 44px 36px;
+    transition: background 0.25s, transform 0.3s;
+    will-change: transform;
+    cursor: default;
+  }
+
+  .feature-card:hover { background: #141210; }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .feature-tag {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+
+  .feature-tag.rust  { color: var(--rust); border-color: var(--rust); }
+  .feature-tag.gold  { color: var(--gold); border-color: var(--gold); }
+  .feature-tag.green { color: var(--green); border-color: var(--green); }
+  .feature-tag.steel { color: #4a6fa5; border-color: #4a6fa5; }
+
+  .feature-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .feature-card p { font-size: 0.88rem; color: #5a5446; line-height: 1.7; }
+
+  /* ─── PREVIEW SECTION ─── */
+  .preview-section {
+    padding: 100px 48px;
+    background: #080706;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .preview-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(200,75,47,0.08) 0%, transparent 60%);
+  }
+
+  .preview-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    position: relative;
+  }
+
+  @media (max-width: 860px) { .preview-inner { grid-template-columns: 1fr; gap: 48px; } }
+
+  .preview-text {}
+
+  .preview-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+
+  .preview-text h2 em { font-style: italic; color: var(--rust); }
+
+  .preview-text p { font-size: 0.95rem; color: #5a5446; line-height: 1.75; margin-bottom: 16px; }
+
+  .preview-checklist { list-style: none; margin: 28px 0 36px; display: flex; flex-direction: column; gap: 12px; }
+
+  .preview-checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.88rem;
+    color: #7a7264;
+    line-height: 1.5;
+  }
+
+  .check-icon { color: var(--green); flex-shrink: 0; font-size: 0.9rem; margin-top: 1px; }
+
+  /* mockup browser */
+  .browser-mock {
+    background: #141210;
+    border: 1px solid #2a2720;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  }
+
+  .browser-bar {
+    background: #1a1816;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #2a2720;
+  }
+
+  .browser-dots { display: flex; gap: 6px; }
+  .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .d1 { background: var(--rust); opacity: 0.7; }
+  .d2 { background: var(--gold); opacity: 0.7; }
+  .d3 { background: var(--green); opacity: 0.7; }
+
+  .browser-url {
+    flex: 1;
+    background: #0f0e0d;
+    border: 1px solid #2a2720;
+    border-radius: 2px;
+    padding: 5px 12px;
+    font-size: 10px;
+    color: #3a3530;
+    letter-spacing: 0.5px;
+  }
+
+  .browser-body { padding: 24px; }
+
+  .mock-hero-bar { height: 60px; background: #0f0e0d; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; }
+  .mock-hero-bar span { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--rust); font-style: italic; }
+
+  .mock-nav { height: 32px; background: #1a1816; margin-bottom: 12px; display: flex; align-items: center; padding: 0 10px; gap: 8px; }
+  .mock-nav-dot { height: 4px; border-radius: 2px; background: #3a3530; }
+
+  .mock-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 10px; }
+  .mock-card { height: 48px; background: #1a1816; border-left: 2px solid; }
+  .mock-card:nth-child(1) { border-color: var(--rust); }
+  .mock-card:nth-child(2) { border-color: var(--gold); }
+  .mock-card:nth-child(3) { border-color: var(--green); }
+
+  .mock-bars { display: flex; flex-direction: column; gap: 5px; }
+  .mock-bar { height: 10px; background: #1a1816; border-radius: 1px; overflow: hidden; }
+  .mock-bar-fill { height: 100%; background: var(--rust); border-radius: 1px; transition: width 1.5s cubic-bezier(0.16,1,0.3,1); width: 0; }
+
+  /* ─── TIMELINE / STRUCTURE ─── */
+  .structure-section {
+    padding: 100px 48px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .timeline { display: flex; flex-direction: column; gap: 0; margin-top: 56px; }
+
+  .timeline-item {
+    display: flex;
+    gap: 32px;
+    padding: 28px 0;
+    border-bottom: 1px solid #1a1816;
+    align-items: flex-start;
+    transition: background 0.2s;
+  }
+
+  .timeline-item:last-child { border-bottom: none; }
+
+  .tl-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #1e1c1a;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 52px;
+    transition: color 0.25s;
+  }
+
+  .timeline-item:hover .tl-num { color: var(--rust); }
+
+  .tl-content {}
+  .tl-tag { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--rust); margin-bottom: 6px; }
+  .tl-title { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--cream); margin-bottom: 8px; }
+  .tl-desc { font-size: 0.85rem; color: #4a4540; line-height: 1.6; }
+
+  /* ─── CTA FINAL ─── */
+  .cta-section {
+    background: var(--rust);
+    padding: 100px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.08) 0%, transparent 60%);
+  }
+
+  .cta-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 900;
+    color: var(--cream);
+    line-height: 1.05;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .cta-section h2 em { font-style: italic; opacity: 0.75; }
+
+  .cta-section p { font-size: 1rem; color: rgba(245,240,232,0.7); position: relative; margin-bottom: 44px; }
+
+  .btn-white {
+    background: var(--cream);
+    color: var(--rust);
+    text-decoration: none;
+    padding: 16px 40px;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  .btn-white:hover { background: #e8e3db; transform: translateY(-2px); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: #080706;
+    padding: 48px;
+    border-top: 1px solid #1a1816;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #2a2720;
+  }
+
+  .footer-logo span { color: var(--rust); font-style: italic; }
+
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 11px; color: #3a3530; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: #5a5446; }
+
+  footer p { font-size: 11px; color: #2a2720; letter-spacing: 1px; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal { opacity: 0; transform: translateY(36px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="page">
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">Net<span>Identity</span></a>
+    <div class="nav-links">
+      <a href="main.html#intro">Dossier</a>
+      <a href="main.html#factchecker">Fact-Check</a>
+      <a href="main.html#veille">Veille</a>
+      <a href="main.html#sondage">Sondage</a>
+      <a href="main.html" class="nav-cta">Lire le dossier →</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">Enjeux du numérique · 2026</div>
+
+    <h1 class="hero-title">
+      <span class="line1">NetIdentity</span>
+      <span class="line2">Qui êtes-vous<br>en ligne ?</span>
+    </h1>
+
+    <p class="hero-sub">
+      Un dossier interactif complet sur l'identification numérique — veille sourcée, sondage, fact-checker et débat argumenté. Explorez les enjeux qui redéfinissent notre présence sur Internet.
+    </p>
+
+    <div class="hero-actions">
+      <a href="main.html" class="btn-primary">Lire le dossier <span class="icon-arrow">→</span></a>
+      <a href="main.html#sondage" class="btn-secondary">Voir le sondage <span class="icon-arrow">↓</span></a>
+    </div>
+  </section>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip reveal">
+    <div class="stat-item">
+      <div class="stat-num rust">79%</div>
+      <p>des enfants ont un téléphone avant 11 ans</p>
+      <small>CNIL / CSA, 2023</small>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num gold">10,5 ans</div>
+      <p>âge moyen du 1er accès à la pornographie</p>
+      <small>ARCOM, France</small>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num steel">$10 500 Md</div>
+      <p>coût mondial de la cybercriminalité d'ici 2025</p>
+      <small>Cybersecurity Ventures</small>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num green">+900%</div>
+      <p>d'augmentation annuelle des deepfakes en ligne</p>
+      <small>DeepMedia</small>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="reveal">
+      <div class="section-eyebrow">Ce que vous trouverez</div>
+      <h2 class="section-title">Un dossier complet,<br>interactif et sourcé.</h2>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal mag-card">
+        <span class="feature-icon">⚖️</span>
+        <span class="feature-tag rust">Débat</span>
+        <h3>Arguments pour &amp; contre</h3>
+        <p>Les deux faces de la médaille, argumentées et sourCées — de la lutte contre le harcèlement à la protection de la vie privée.</p>
+      </div>
+      <div class="feature-card reveal mag-card">
+        <span class="feature-icon">✅</span>
+        <span class="feature-tag gold">Fact-Check</span>
+        <h3>Quiz Vrai ou Faux</h3>
+        <p>6 affirmations cliquables à décoder. Révélez les vrais chiffres et les sources officielles — les réponses surprennent.</p>
+      </div>
+      <div class="feature-card reveal mag-card">
+        <span class="feature-icon">⚡</span>
+        <span class="feature-tag green">Veille</span>
+        <h3>Veille technologique 2026</h3>
+        <p>ARCOM, FBI, CNIL, Europol, deepfakes… Les données les plus récentes avec liens directs vers les rapports officiels.</p>
+      </div>
+      <div class="feature-card reveal mag-card">
+        <span class="feature-icon">📊</span>
+        <span class="feature-tag steel">Sondage</span>
+        <h3>Résultats du sondage</h3>
+        <p>25 réponses collectées sur 9 questions. Graphiques animés au scroll — mots de passe, double auth, biométrie et plus.</p>
+      </div>
+      <div class="feature-card reveal mag-card">
+        <span class="feature-icon">🕵️</span>
+        <span class="feature-tag gold">Expert</span>
+        <h3>Alex, Expert Cyber</h3>
+        <p>Un avatar expert flottant qui guide la lecture avec des anecdotes et conseils terrain tout au long du dossier.</p>
+      </div>
+      <div class="feature-card reveal mag-card">
+        <span class="feature-icon">🔗</span>
+        <span class="feature-tag rust">Sources</span>
+        <h3>Tooltips de sources</h3>
+        <p>Chaque chiffre clé est survolable pour afficher la source officielle et un lien direct — zéro approximation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREVIEW -->
+  <section class="preview-section">
+    <div class="preview-inner">
+      <div class="preview-text reveal">
+        <div class="section-eyebrow">Aperçu du dossier</div>
+        <h2>Interactif, <em>humain</em><br>et vérifiable.</h2>
+        <p>Le dossier NetIdentity ne se contente pas d'afficher des informations — il vous implique, vous challenge et vous donne les clés pour vous forger votre propre opinion.</p>
+        <ul class="preview-checklist">
+          <li><span class="check-icon">✓</span> Navigation fluide avec indicateur de section active</li>
+          <li><span class="check-icon">✓</span> Barres animées au scroll via Intersection Observer</li>
+          <li><span class="check-icon">✓</span> Cartes magnétiques avec effet de tilt 3D</li>
+          <li><span class="check-icon">✓</span> Fact-checker interactif cliquable + accessible clavier</li>
+          <li><span class="check-icon">✓</span> 100% Vanilla JS — aucune librairie externe</li>
+        </ul>
+        <a href="main.html" class="btn-primary">Ouvrir le dossier <span class="icon-arrow">→</span></a>
+      </div>
+
+      <div class="browser-mock reveal">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <span class="d1"></span>
+            <span class="d2"></span>
+            <span class="d3"></span>
+          </div>
+          <div class="browser-url">netidentity / main.html</div>
+        </div>
+        <div class="browser-body">
+          <div class="mock-nav">
+            <div class="mock-nav-dot" style="width:40px;"></div>
+            <div class="mock-nav-dot" style="width:52px;"></div>
+            <div class="mock-nav-dot" style="width:36px;"></div>
+            <div class="mock-nav-dot" style="width:44px;"></div>
+          </div>
+          <div class="mock-hero-bar"><span>Doit-on s'identifier ?</span></div>
+          <div class="mock-grid">
+            <div class="mock-card"></div>
+            <div class="mock-card"></div>
+            <div class="mock-card"></div>
+          </div>
+          <div class="mock-bars" id="mockBars">
+            <div class="mock-bar"><div class="mock-bar-fill" style="width:0%;background:var(--rust);"></div></div>
+            <div class="mock-bar"><div class="mock-bar-fill" style="width:0%;background:var(--gold);"></div></div>
+            <div class="mock-bar"><div class="mock-bar-fill" style="width:0%;background:var(--green);"></div></div>
+            <div class="mock-bar"><div class="mock-bar-fill" style="width:0%;background:#4a6fa5;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRUCTURE TIMELINE -->
+  <section class="structure-section">
+    <div class="reveal">
+      <div class="section-eyebrow">Structure du dossier</div>
+      <h2 class="section-title">7 sections,<br>une progression logique.</h2>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item reveal">
+        <div class="tl-num">01</div>
+        <div class="tl-content">
+          <div class="tl-tag">Introduction</div>
+          <div class="tl-title">L'identité à l'ère numérique</div>
+          <p class="tl-desc">Contexte, définitions et problématique centrale : peut-on encore vraiment choisir d'être anonyme en ligne ?</p>
+        </div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="tl-num">02</div>
+        <div class="tl-content">
+          <div class="tl-tag">Thématiques</div>
+          <div class="tl-title">Réseaux sociaux, -18 ans, vie privée…</div>
+          <p class="tl-desc">5 grandes thématiques décortiquées avec cartes interactives et effet magnétique.</p>
+        </div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="tl-num">03</div>
+        <div class="tl-content">
+          <div class="tl-tag">Débat</div>
+          <div class="tl-title">Pour ou contre l'identification ?</div>
+          <p class="tl-desc">4 arguments de chaque côté, sourCés et nuancés — le débat présenté sans parti pris.</p>
+        </div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="tl-num">04</div>
+        <div class="tl-content">
+          <div class="tl-tag">Fact-Check</div>
+          <div class="tl-title">Vrai ou Faux ? — 6 affirmations à décoder</div>
+          <p class="tl-desc">Module interactif cliquable qui révèle les chiffres réels vs les idées reçues.</p>
+        </div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="tl-num">05</div>
+        <div class="tl-content">
+          <div class="tl-tag">Veille technologique</div>
+          <div class="tl-title">6 thèmes · Chiffres 2024–2026</div>
+          <p class="tl-desc">Deepfakes, cybercriminalité, ARCOM, CNIL, fuites de données, exclusion numérique — avec sources survolables.</p>
+        </div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="tl-num">06</div>
+        <div class="tl-content">
+          <div class="tl-tag">Sondage</div>
+          <div class="tl-title">25 réponses · 9 questions animées</div>
+          <p class="tl-desc">Barres et donuts animés au scroll, sur mots de passe, biométrie, CGU et plus.</p>
+        </div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="tl-num">07</div>
+        <div class="tl-content">
+          <div class="tl-tag">Conclusion</div>
+          <div class="tl-title">Un juste milieu nécessaire</div>
+          <p class="tl-desc">Le verdict final : pourquoi l'identification totale et l'anonymat total sont tous les deux dangereux.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-section reveal">
+    <h2>Prêt à explorer<br><em>NetIdentity ?</em></h2>
+    <p>Le dossier complet vous attend — interactif, sourcé, sans publicité.</p>
+    <a href="main.html" class="btn-white">Lire le dossier complet <span class="icon-arrow">→</span></a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Net<span>Identity</span></div>
+    <div class="footer-links">
+      <a href="main.html#intro">Dossier</a>
+      <a href="main.html#factchecker">Fact-Check</a>
+      <a href="main.html#veille">Veille</a>
+      <a href="main.html#sondage">Sondage</a>
+    </div>
+    <p>Enjeux du numérique · 2026 · Sources : CNIL, ARCOM, FBI, Europol</p>
+  </footer>
+
+</div><!-- .page -->
+
+<script>
+/* ─── ANIMATED BG CANVAS ─── */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function initParticles() {
+  particles = [];
+  const count = Math.floor((W * H) / 18000);
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.2 + 0.3,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      color: ['#c84b2f','#d4a53f','#3a7d5c','#4a6fa5'][Math.floor(Math.random()*4)],
+      alpha: Math.random() * 0.5 + 0.1
+    });
+  }
+}
+
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W;
+    if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H;
+    if (p.y > H) p.y = 0;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.alpha;
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  // draw connections
+  particles.forEach((a, i) => {
+    particles.slice(i + 1).forEach(b => {
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = '#3a3530';
+        ctx.globalAlpha = (1 - dist/120) * 0.3;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+    });
+  });
+
+  requestAnimationFrame(drawParticles);
+}
+
+resize();
+initParticles();
+drawParticles();
+window.addEventListener('resize', () => { resize(); initParticles(); }, { passive: true });
+
+
+/* ─── SCROLL REVEAL ─── */
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 70);
+      revealObs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+
+/* ─── MOCK BAR ANIMATION ─── */
+const mockBarObs = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const targets = [60, 36, 52, 80];
+      entry.target.querySelectorAll('.mock-bar-fill').forEach((bar, i) => {
+        setTimeout(() => { bar.style.transition = 'width 1.5s cubic-bezier(0.16,1,0.3,1)'; bar.style.width = targets[i] + '%'; }, i * 200);
+      });
+      mockBarObs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.4 });
+
+const mockBarsEl = document.getElementById('mockBars');
+if (mockBarsEl) mockBarObs.observe(mockBarsEl);
+
+
+/* ─── MAGNETIC HOVER ─── */
+document.querySelectorAll('.mag-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const dx = (e.clientX - r.left - r.width/2) / r.width;
+    const dy = (e.clientY - r.top - r.height/2) / r.height;
+    card.style.transform = `translate(${dx*10}px,${dy*10}px) rotateX(${-dy*6}deg) rotateY(${dx*6}deg)`;
+  });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+});
+</script>
+</body>
+</html>
