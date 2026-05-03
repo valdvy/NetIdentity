@@ -21,7 +21,7 @@ NetIdentity/
 | ✅ **Fact-Checker** | 6 affirmations cliquables · révèle les vrais chiffres + sources |
 | ⚡ **Veille 2026** | ARCOM, FBI, CNIL, Europol, deepfakes — données récentes |
 | 📊 **Sondage** | 25 réponses · 9 questions · graphiques animés au scroll |
-| 🕵️ **Expert Avatar** | Expert en cyber |
+| 🕵️ **Expert Avatar** | Quentin Poggi, mon amoureux |
 | 🔗 **Source Tooltips** | Chaque chiffre clé → popup avec lien officiel au survol |
 | 🧲 **Magnetic Hover** | Effet de tilt 3D sur les cartes |
 | 🌌 **Particle BG** | Canvas animé avec réseau de particules (index.html) |
