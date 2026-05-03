@@ -2,11 +2,6 @@
 
 > **Doit-on s'identifier sur Internet ?**  
 > Un dossier interactif complet sur l'identification numérique — débat, veille sourCée, fact-checker et sondage.
-
-![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
-![CSS](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
-
 ---
 
 ## 📁 Structure du projet
@@ -62,13 +57,6 @@ NetIdentity/
 | Banque Mondiale — ID4D | https://www.banquemondiale.org/fr/topic/digitalidentity |
 | Have I Been Pwned | https://haveibeenpwned.com |
 
-## 🌐 Déploiement
-
-Ce projet est prêt pour **GitHub Pages** :
-
-1. Aller dans `Settings → Pages`
-2. Source : `main branch` / `root`
-3. Accès : `https://[username].github.io/NetIdentity/`
 
 ---
 
